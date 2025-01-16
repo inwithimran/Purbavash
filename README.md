@@ -46,8 +46,8 @@ To run this project locally, follow these steps:
 1. **Clone the repository**
 
    ```sh
-   git clone https://github.com/amit712singhal/Sky-Now.git
-   cd Sky-Now
+   git clone https://github.com/inwithimran/Purbavash.git
+   
    ```
 
 2. **Open index.html in your web browser**
