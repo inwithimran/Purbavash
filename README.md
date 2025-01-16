@@ -1,4 +1,4 @@
-<p align="center"><img align="center" width="280" src="./public/images/logo-dark.png"/></p>
+<p align="center"><img align="center" width="280" src="./public/images/logo-purbavas.png"/></p>
 <p align="center"><img align="center" width="280" src="./public/images/logo-light.png#gh-light-mode-only"/></p>
 <h3 align="center">Get Live Weather Updates: Real-Time OpenWeather App</h3>
 <hr>
@@ -23,7 +23,7 @@ Check out the live demo [here](https://inwithimran.github.io/Purbavash/).
 ![Mobile Preview](public/images/Screenshot_2025-01-17-00-29-33-530_com.android.chrome.jpg)
 
 ### Desktop
-![Destop Preview](public/images/desktop-demo.png)
+![Destop Preview](public/images/Screenshot_2025-01-17-00-19-52-398_com.android.chrome-edit.jpg)
 
 <details>
      <summary><h2>Table of Contents</h2></summary>
