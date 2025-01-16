@@ -20,7 +20,7 @@ Check out the live demo [here](https://inwithimran.github.io/Purbavash/).
 ## Preview
 
 ### Mobile
-![Mobile Preview](public/images/mobile-demo.png)
+![Mobile Preview](public/images/Screenshot_2025-01-17-00-29-33-530_com.android.chrome.jpg)
 
 ### Desktop
 ![Destop Preview](public/images/desktop-demo.png)
