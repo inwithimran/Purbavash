@@ -19,9 +19,11 @@ Check out the live demo [here](https://inwithimran.github.io/Purbavash/).
 
 ## Preview
 
-### Desktop
+### Mobile
+![Mobile Preview](public/images/mobile-demo.png)
 
-![Destop Preview](public/images/demo.png)
+### Desktop
+![Destop Preview](public/images/desktop-demo.png)
 
 <details>
      <summary><h2>Table of Contents</h2></summary>
