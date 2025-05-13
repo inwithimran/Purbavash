@@ -15,8 +15,6 @@ const cursorOutline = document.querySelector("[data-cursor-outline]");
 window.addEventListener("mousemove", function (e) {
   cursorDot.style.left = e.clientX + "px";
   cursorDot.style.top = e.clientY + "px";
-  // cursorOutline.style.left = e.clientX + "px";
-  // cursorOutline.style.top = e.clientY + "px";
   cursorOutline.animate(
     {
       left: e.clientX + "px",
@@ -51,7 +49,6 @@ addEventOnElements(searchTogglers, "click", toggleSearch);
 /**
  * ----------------------------------------- Search Integration ------------------------------------------
  */
-
 const searchField = document.querySelector("[data-search-field]");
 const searchResult = document.querySelector("[data-search-result]");
 
@@ -107,10 +104,45 @@ searchField.addEventListener("input", function () {
 
 const container = document.querySelector("[data-container]");
 const loading = document.querySelector("[data-loading]");
-const currentLocationBtn = document.querySelector(
-  "[data-current-location-btn]"
-);
+const currentLocationBtn = document.querySelector("[data-current-location-btn]");
 const errorContent = document.querySelector("[data-error-content]");
+
+/**
+ * ---------------------------------- Current Location Button Handler -----------------------------------
+ */
+currentLocationBtn.addEventListener("click", function () {
+  window.location.hash = "#/current-location";
+});
+
+/**
+ * ---------------------------------- Bottom Tab Navigation -----------------------------------
+ */
+const tabButtons = document.querySelectorAll("[data-tab-btn]");
+const tabContents = document.querySelectorAll("[data-tab-content]");
+
+const switchTab = function () {
+  const targetId = this.getAttribute("data-tab-target");
+
+  // Remove active class from all tabs
+  tabButtons.forEach((btn) => btn.classList.remove("active"));
+  // Add active class to clicked tab
+  this.classList.add("active");
+
+  // Remove fade-in class from container to reset animation
+  container.classList.remove("slide-in");
+
+  // Hide all content sections
+  tabContents.forEach((content) => (content.style.display = "none"));
+
+  // Show target content section with a slight delay to trigger animation
+  const targetContent = document.getElementById(targetId);
+  setTimeout(() => {
+    targetContent.style.display = "block";
+    container.classList.add("slide-in");
+  }, 10); // Small delay to ensure the animation is triggered
+};
+
+addEventOnElements(tabButtons, "click", switchTab);
 
 /**
  * --------------------------- Render All Weather Data in the HTML Page ------------------------------
@@ -118,21 +150,19 @@ const errorContent = document.querySelector("[data-error-content]");
  * @param {number} lon Longitude
  */
 export const updateWeather = function (lat, lon) {
-  loading.style.display = "grid";
+  loading.classList.add("active"); // Show loading
   container.style.overflowY = "hidden";
   container.classList.remove("fade-in");
   errorContent.style.display = "none";
 
-  const currentWeatherSection = document.querySelector(
-    "[data-current-weather]"
-  );
-  const highlightSection = document.querySelector("[data-highlights]");
+  const currentWeatherSection = document.querySelector("[data-current-weather]");
   const hourlySection = document.querySelector("[data-hourly-forecast]");
+  const highlightSection = document.querySelector("[data-highlights]");
   const forecastSection = document.querySelector("[data-5-day-forecast]");
 
   currentWeatherSection.innerHTML = "";
-  highlightSection.innerHTML = "";
   hourlySection.innerHTML = "";
+  highlightSection.innerHTML = "";
   forecastSection.innerHTML = "";
 
   if (window.location.hash === "#/current-location") {
@@ -144,7 +174,6 @@ export const updateWeather = function (lat, lon) {
   /**
    * ----------------------------------- Current Weather Section ----------------------------------------
    */
-
   fetchData(url.currentWeather(lat, lon), function (currentWeather) {
     const {
       weather,
@@ -159,13 +188,12 @@ export const updateWeather = function (lat, lon) {
     card.classList.add("card", "card-lg", "current-weather-card");
 
     // Determine the icon based on the description
-    const weatherIcon =
-      description === "broken clouds" ? "04.0d" : icon;
+    const weatherIcon = description === "broken clouds" ? "04.0d" : icon;
 
     card.innerHTML = `
       <h2 class="title-2 card-title">Now</h2>
       <div class="weapper">
-        <p class="heading">${parseInt(temp)}&deg;<sup>c</sup></p>
+        <p class="heading">${parseInt(temp)}°<sup>c</sub></p>
         <img
           src="./public/images/weather_icons/${weatherIcon}.png"
           width="64"
@@ -174,9 +202,7 @@ export const updateWeather = function (lat, lon) {
           class="weather-icon"
         />
       </div>
-
       <p class="body-3">${description}</p>
-
       <ul class="meta-list">
         <li class="meta-item">
           <span class="m-icon">calendar_today</span>
@@ -195,116 +221,6 @@ export const updateWeather = function (lat, lon) {
     currentWeatherSection.appendChild(card);
 
     /**
-     * ------------------------------------ Today's Highlights ---------------------------------------------
-     */
-    fetchData(url.airPollution(lat, lon), function (airPollution) {
-      const [
-        {
-          main: { aqi },
-          components: { no2, o3, so2, pm2_5 },
-        },
-      ] = airPollution.list;
-
-      const card = document.createElement("div");
-      card.classList.add("card", "card-lg");
-
-      card.innerHTML = `
-        <h2 class="title-2" id="highlights-label">Today's Highlights</h2>
-
-        <div class="highlight-list">
-          <div class="card card-sm highlight-card one">
-            <h3 class="title-3">Air Quality Index</h3>
-            <div class="wrapper">
-              <span class="m-icon">air</span>
-              <ul class="card-list">
-                <li class="card-item">
-                  <p class="title-1">${pm2_5.toPrecision(3)}</p>
-                  <p class="label-1">PM<sub>2.5</sub></p>
-                </li>
-                <li class="card-item">
-                  <p class="title-1">${so2.toPrecision(3)}</p>
-                  <p class="label-1">SO<sub>2</sub></p>
-                </li>
-                <li class="card-item">
-                  <p class="title-1">${no2.toPrecision(3)}</p>
-                  <p class="label-1">NO<sub>2</sub></p>
-                </li>
-                <li class="card-item">
-                  <p class="title-1">${o3.toPrecision(3)}</p>
-                  <p class="label-1">O<sub>3</sub></p>
-                </li>
-              </ul>
-            </div>
-            <span class="badge aqi-${aqi} label-${aqi}" title="${
-        module.aqiText[aqi].message
-      }">
-              ${module.aqiText[aqi].level}
-            </span>
-          </div>
-
-          <div class="card card-sm highlight-card two">
-            <h3 class="title-3">Sunrise & Sunset</h3>
-            <div class="card-list">
-              <div class="card-item">
-                <span class="m-icon">clear_day</span>
-                <div>
-                  <p class="label-1">Sunrise</p>
-                  <p class="title-1">${module.getTime(
-                    sunriseUnixUTC,
-                    timezone
-                  )}</p>
-                </div>
-              </div>
-              <div class="card-item">
-                <span class="m-icon">clear_night</span>
-                <div>
-                  <p class="label-1">Sunset</p>
-                  <p class="title-1">${module.getTime(
-                    sunsetUnixUTC,
-                    timezone
-                  )}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card card-sm highlight-card">
-            <h3 class="title-3">Humidity</h3>
-            <div class="wrapper">
-              <span class="m-icon">humidity_percentage</span>
-              <p class="title-1">${humidity}<sub>%</sub></p>
-            </div>
-          </div>
-
-          <div class="card card-sm highlight-card">
-            <h3 class="title-3">Pressure</h3>
-            <div class="wrapper">
-              <span class="m-icon">airwave</span>
-              <p class="title-1">${pressure}<sub>hPa</sub></p>
-            </div>
-          </div>
-
-          <div class="card card-sm highlight-card">
-            <h3 class="title-3">Visibility</h3>
-            <div class="wrapper">
-              <span class="m-icon">visibility</span>
-              <p class="title-1">${visibility / 1000}<sub>km</sub></p>
-            </div>
-          </div>
-
-          <div class="card card-sm highlight-card">
-            <h3 class="title-3">Feels Like</h3>
-            <div class="wrapper">
-              <span class="m-icon">thermostat</span>
-              <p class="title-1">${parseInt(feels_like)}&deg;<sup>c</sup></p>
-            </div>
-          </div>
-        </div>
-      `;
-      highlightSection.appendChild(card);
-    });
-
-    /**
      * ------------------------------------ 24-Hour Forecast Section ------------------------------------------
      */
     fetchData(url.forecast(lat, lon), function (forecast) {
@@ -314,10 +230,11 @@ export const updateWeather = function (lat, lon) {
       } = forecast;
 
       hourlySection.innerHTML = `
-        <h2 class="title-2">Today at</h2>
-        <div class="slider-container">
-          <ul class="slider-list" data-temp></ul>
-          <ul class="slider-list" data-wind></ul>
+        <div class="card card-lg">
+          <h2 class="title-2">Today at</h2>
+          <div class="slider-container">
+            <ul class="slider-list" data-hourly></ul>
+          </div>
         </div>
       `;
 
@@ -329,57 +246,147 @@ export const updateWeather = function (lat, lon) {
           weather,
           wind: { deg: windDirection, speed: windSpeed },
         } = data;
-        const [ { icon, description } ] = weather;
-        
+        const [{ icon, description }] = weather;
+
         const weatherIcon = description === "broken clouds" ? "04.0d" : icon;
 
-        const tempLi = document.createElement("li");
-        tempLi.classList.add("slider-item");
-        tempLi.innerHTML = `
-          <div class="card card-sm slider-card">
-            <p class="body-3">${module.getHours(dateTimeUnix, timezone)}</p>
-            <img
-              src="./public/images/weather_icons/${weatherIcon}.png"
-              width="48"
-              height="48"
-              loading="lazy"
-              title="${description}"
-              alt="${description}"
-              class="weather-icon"
-            />
-            <p class="body-3">${parseInt(temp)}&deg;</p>
+        const hourlyLi = document.createElement("li");
+        hourlyLi.classList.add("slider-item");
+        hourlyLi.innerHTML = `
+          <div class="hourly-item">
+            <p class="body-3 time">${module.getHours(dateTimeUnix, timezone)}</p>
+            <div class="weather-info">
+              <img
+                src="./public/images/weather_icons/${weatherIcon}.png"
+                width="36"
+                height="36"
+                loading="lazy"
+                title="${description}"
+                alt="${description}"
+                class="weather-icon"
+              />
+              <p class="body-3 temp">${parseInt(temp)}°</p>
+            </div>
+            <div class="wind-info">
+              <img
+                src="./public/images/weather_icons/direction.png"
+                width="24"
+                height="24"
+                loading="lazy"
+                alt="direction"
+                class="wind-direction"
+                style="transform: rotate(${windDirection - 180}deg)"
+              />
+              <p class="body-3 wind-speed">${parseInt(module.mps_to_kmh(windSpeed))} km/h</p>
+            </div>
           </div>
         `;
-        hourlySection.querySelector("[data-temp]").appendChild(tempLi);
-
-        const windLi = document.createElement("li");
-        windLi.classList.add("slider-item");
-        windLi.innerHTML = `
-          <div class="card card-sm slider-card">
-            <p class="body-3">${module.getHours(dateTimeUnix, timezone)}</p>
-            <img
-              src="./public/images/weather_icons/direction.png"
-              width="48"
-              height="48"
-              loading="lazy"
-              alt="direction"
-              class="weather-icon"
-              style = "transform: rotate(${windDirection - 180}deg)"
-            />
-            <p class="body-3">${parseInt(module.mps_to_kmh(windSpeed))} km/h</p>
-          </div>
-        `;
-        hourlySection.querySelector("[data-wind]").appendChild(windLi);
+        hourlySection.querySelector("[data-hourly]").appendChild(hourlyLi);
       }
+
+      /**
+       * ------------------------------------ Today's Highlights ---------------------------------------------
+       */
+      fetchData(url.airPollution(lat, lon), function (airPollution) {
+        const [
+          {
+            main: { aqi },
+            components: { no2, o3, so2, pm2_5 },
+          },
+        ] = airPollution.list;
+
+        const card = document.createElement("div");
+        card.classList.add("card", "card-lg");
+
+        card.innerHTML = `
+          <h2 class="title-2" id="highlights-label">Today's Highlights</h2>
+          <div class="highlight-list">
+            <div class="highlight-card">
+              <div class="details-grid">
+                <div class="detail-item">
+                  <div class="detail-wrapper">
+                    <span class="m-icon">humidity_percentage</span>
+                    <p class="label-1">Humidity</p>
+                  </div>
+                  <p class="title-3">${humidity}%</p>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-wrapper">
+                    <span class="m-icon">airwave</span>
+                    <p class="label-1">Pressure</p>
+                  </div>
+                  <p class="title-3">${pressure}hPa</p>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-wrapper">
+                    <span class="m-icon">thermostat</span>
+                    <p class="label-1">Feels Like</p>
+                  </div>
+                  <p class="title-3">${parseInt(feels_like)}°C</p>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-wrapper">
+                    <span class="m-icon">visibility</span>
+                    <p class="label-1">Visibility</p>
+                  </div>
+                  <p class="title-3">${visibility / 1000} km</p>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-wrapper">
+                    <span class="m-icon">clear_day</span>
+                    <p class="label-1">Sunrise</p>
+                  </div>
+                  <p class="title-3">${module.getTime(sunriseUnixUTC, timezone)}</p>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-wrapper">
+                    <span class="m-icon">clear_night</span>
+                    <p class="label-1">Sunset</p>
+                  </div>
+                  <p class="title-3">${module.getTime(sunsetUnixUTC, timezone)}</p>
+                </div>
+              </div>
+              <div class="aqi-section">
+                <div class="aqi-header">
+                  <span class="m-icon">air</span>
+                  <h3 class="title-3" style="display: inline; margin: 0;">Air Quality Index</h3>
+                </div>
+                <span class="badge aqi-${aqi}" title="${module.aqiText[aqi].message}">
+                  ${module.aqiText[aqi].level}
+                </span>
+                <p class="body-3 aqi-description">${module.aqiText[aqi].message}</p>
+                <div class="aqi-values">
+                  <div class="aqi-item">
+                    <p class="label-1">PM2.5</p>
+                    <p class="title-3">${pm2_5.toPrecision(3)}</p>
+                  </div>
+                  <div class="aqi-item">
+                    <p class="label-1">SO2</p>
+                    <p class="title-3">${so2.toPrecision(3)}</p>
+                  </div>
+                  <div class="aqi-item">
+                    <p class="label-1">NO2</p>
+                    <p class="title-3">${no2.toPrecision(3)}</p>
+                  </div>
+                  <div class="aqi-item">
+                    <p class="label-1">O3</p>
+                    <p class="title-3">${o3.toPrecision(3)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        highlightSection.appendChild(card);
+      });
 
       /**
        * ------------------------------------ 5-Day Forecast Section --------------------------------------------
        */
       forecastSection.innerHTML = `
-        <h2 class="title-2" id="forecast-label">5 Days Forecast</h2>
         <div class="card card-lg forecast-card">
-          <ul data-forecast-list>
-          </ul>
+          <h2 class="title-2" id="forecast-label">5 Days Forecast</h2>
+          <ul data-forecast-list></ul>
         </div>
       `;
 
@@ -389,8 +396,8 @@ export const updateWeather = function (lat, lon) {
           weather,
           dt_txt,
         } = forecastList[i];
-        const [ { icon, description } ] = weather;
-        
+        const [{ icon, description }] = weather;
+
         const weatherIcon = description === "broken clouds" ? "04.0d" : icon;
 
         const date = new Date(dt_txt);
@@ -404,26 +411,28 @@ export const updateWeather = function (lat, lon) {
               height="36"
               alt="${description}"
               class="weather-icon"
-              title = "${description}"
+              title="${description}"
             />
             <span class="span">
-              <p class="title-2">${parseInt(temp_max)}&deg;</p>
+              <p class="title-2">${parseInt(temp_max)}°</p>
             </span>
           </div>
           <p class="label-1">${date.getDate()} ${
           module.monthNames[date.getUTCMonth()]
         }</p>
-          <p class="label-1"> ${module.weekDayNames[date.getUTCDay()]}</p>
+          <p class="label-1">${module.weekDayNames[date.getUTCDay()]}</p>
         `;
-
         forecastSection.querySelector("[data-forecast-list]").appendChild(li);
       }
 
-      loading.style.display = "none";
+      loading.classList.remove("active"); // Hide loading
       container.style.overflowY = "overlay";
       container.classList.add("fade-in");
     });
   });
 };
 
-export const error404 = () => (errorContent.style.display = "flex");
+export const error404 = () => {
+  errorContent.style.display = "flex";
+  loading.classList.remove("active"); // Ensure loading is hidden on error
+};
